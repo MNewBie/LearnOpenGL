@@ -2,15 +2,43 @@
 #include "gg.h"
 #include "scene.h"
 
-
+POINT originalPos;
+bool rotateView = false;
 
 LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
+	case WM_RBUTTONDOWN:
+		GetCursorPos(&originalPos);
+		ShowCursor(false);
+		rotateView = true;
+		return 0;
+	case WM_RBUTTONUP:
+		SetCursorPos(originalPos.x, originalPos.y);
+		ShowCursor(true);
+		rotateView = false;
+		return 0;
+	case WM_MOUSEMOVE:
+		if (rotateView)
+		{
+			POINT currentPos;
+			GetCursorPos(&currentPos);
+			int deltaX = currentPos.x - originalPos.x;
+			int deltaY = currentPos.y - originalPos.y;
+			OnMouseMove(deltaX, deltaY);
+			SetCursorPos(originalPos.x, originalPos.y);
+		}
+		return 0;
+	case WM_KEYDOWN:
+		OnKeyDown(wparam);
+		return 0;
+	case WM_KEYUP:
+		OnKeyUp(wparam);
+		return 0;
 	case WM_CLOSE:
 		PostQuitMessage(0);
-			return 0;
+		return 0;
 	}
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
